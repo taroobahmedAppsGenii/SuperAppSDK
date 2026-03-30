@@ -87,6 +87,12 @@ jobs:
           git add Package.swift
           git commit -m "chore: update Package.swift for release $VERSION [skip ci]"
           git push origin HEAD:main
+          
+      - name: Move Tag to Updated Commit
+        run: |
+          VERSION=${{ github.ref_name }}
+          git tag -f $VERSION              # force move tag to current commit
+          git push origin -f $VERSION      # force push updated tag
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
