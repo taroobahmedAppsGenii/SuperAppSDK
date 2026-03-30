@@ -13,8 +13,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SuperAppSDK",
-            url: "https://github.com/taroobahmedAppsGenii/SuperAppSDK/releases/download/1.0.4/SuperAppSDK.xcframework.zip",
-            checksum: "9d9b8968f9016b49c350e3322c507bf60457d5ba4bd1a716146c62ad039e48f0"
+            url: "https://github.com/taroobahmedAppsGenii/SuperAppSDK/releases/download/1.0.5/SuperAppSDK.xcframework.zip",
+            checksum: "7c35a000aafe6bbebe0ad4bc2856e82494f0a52be967652b464a1559af636e66"
         )
     ]
 )
