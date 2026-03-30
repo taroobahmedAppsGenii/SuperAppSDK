@@ -49,6 +49,7 @@ public struct SuperAppSDKRootView: View {
                     .font(.system(size: 60))
                     .foregroundColor(.blue)
 
+                
                 Text("Super App")
                     .font(.largeTitle)
                     .bold()
