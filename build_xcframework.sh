@@ -15,7 +15,9 @@ xcodebuild archive \
   -destination "generic/platform=iOS" \
   -archivePath $BUILD_DIR/ios_devices \
   SKIP_INSTALL=NO \
-  BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+  BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO
 
 echo "▶️ Building iOS simulator archive"
 xcodebuild archive \
@@ -24,7 +26,9 @@ xcodebuild archive \
   -destination "generic/platform=iOS Simulator" \
   -archivePath $BUILD_DIR/ios_simulator \
   SKIP_INSTALL=NO \
-  BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+  BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO
 
 echo "▶️ Creating XCFramework"
 xcodebuild -create-xcframework \
