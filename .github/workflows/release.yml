@@ -1,0 +1,98 @@
+name: Build and Release XCFramework
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Select Latest Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show Xcode Version
+        run: xcodebuild -version
+
+      - name: List Schemes
+        run: xcodebuild -list -project SuperAppSDK.xcodeproj
+
+      - name: Archive for Simulator
+        run: |
+          xcodebuild archive \
+            -project SuperAppSDK.xcodeproj \
+            -scheme "SuperAppSDK" \
+            -destination "generic/platform=iOS Simulator" \
+            -archivePath "./build/SuperAppSDK-Simulator.xcarchive" \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Archive for Device
+        run: |
+          xcodebuild archive \
+            -project SuperAppSDK.xcodeproj \
+            -scheme "SuperAppSDK" \
+            -destination "generic/platform=iOS" \
+            -archivePath "./build/SuperAppSDK-iOS.xcarchive" \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Verify Frameworks Exist
+        run: |
+          echo "--- Simulator ---"
+          find ./build/SuperAppSDK-Simulator.xcarchive -name "*.framework"
+          echo "--- Device ---"
+          find ./build/SuperAppSDK-iOS.xcarchive -name "*.framework"
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework ./build/SuperAppSDK-Simulator.xcarchive/Products/Library/Frameworks/SuperAppSDK.framework \
+            -framework ./build/SuperAppSDK-iOS.xcarchive/Products/Library/Frameworks/SuperAppSDK.framework \
+            -output ./build/SuperAppSDK.xcframework
+
+      - name: Zip XCFramework
+        run: |
+          cd ./build
+          zip -r SuperAppSDK.xcframework.zip SuperAppSDK.xcframework
+
+      - name: Compute Checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum ./build/SuperAppSDK.xcframework.zip)
+          echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
+          echo "Checksum: $CHECKSUM"
+
+      - name: Update Package.swift
+        run: |
+          VERSION=${{ github.ref_name }}
+          CHECKSUM=${{ steps.checksum.outputs.checksum }}
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/$VERSION/SuperAppSDK.xcframework.zip"
+
+          sed -i '' "s|url: \".*\"|url: \"$DOWNLOAD_URL\"|" Package.swift
+          sed -i '' "s|checksum: \".*\"|checksum: \"$CHECKSUM\"|" Package.swift
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Package.swift
+          git commit -m "chore: update Package.swift for release $VERSION [skip ci]"
+          git push origin HEAD:main
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: "Automated release of SuperAppSDK ${{ github.ref_name }}"
+          files: ./build/SuperAppSDK.xcframework.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
