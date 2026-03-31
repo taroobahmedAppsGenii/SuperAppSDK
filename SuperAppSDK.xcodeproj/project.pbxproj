@@ -266,6 +266,8 @@
 		B2E063D52F7AAF0500B367CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+                SWIFT_EMIT_MODULE_INTERFACE = YES;
+                SWIFT_ENABLE_LIBRARY_EVOLUTION = YES;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
@@ -306,6 +308,8 @@
 		B2E063D62F7AAF0500B367CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+                SWIFT_EMIT_MODULE_INTERFACE = YES;
+                SWIFT_ENABLE_LIBRARY_EVOLUTION = YES;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
