@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Select Latest Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
@@ -35,7 +36,9 @@ jobs:
             -destination "generic/platform=iOS Simulator" \
             -archivePath "./build/SuperAppSDK-Simulator.xcarchive" \
             SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+            SWIFT_EMIT_MODULE_INTERFACE=YES \
+            SWIFT_ENABLE_LIBRARY_EVOLUTION=YES
 
       - name: Archive for Device
         run: |
@@ -45,7 +48,9 @@ jobs:
             -destination "generic/platform=iOS" \
             -archivePath "./build/SuperAppSDK-iOS.xcarchive" \
             SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+            SWIFT_EMIT_MODULE_INTERFACE=YES \
+            SWIFT_ENABLE_LIBRARY_EVOLUTION=YES
 
       - name: Verify Frameworks Exist
         run: |
@@ -53,6 +58,8 @@ jobs:
           find ./build/SuperAppSDK-Simulator.xcarchive -name "*.framework"
           echo "--- Device ---"
           find ./build/SuperAppSDK-iOS.xcarchive -name "*.framework"
+          echo "--- Swift Interfaces ---"
+          find ./build -name "*.swiftinterface"
 
       - name: Create XCFramework
         run: |
@@ -87,12 +94,12 @@ jobs:
           git add Package.swift
           git commit -m "chore: update Package.swift for release $VERSION [skip ci]"
           git push origin HEAD:main
-          
+
       - name: Move Tag to Updated Commit
         run: |
           VERSION=${{ github.ref_name }}
-          git tag -f $VERSION              # force move tag to current commit
-          git push origin -f $VERSION      # force push updated tag
+          git tag -f $VERSION
+          git push origin -f $VERSION
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
