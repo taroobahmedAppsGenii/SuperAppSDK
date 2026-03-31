@@ -1,0 +1,6 @@
+SuperAppSDK/
+build/
+build_xcframework.sh
+*.xcframework
+*.zip
+.DS_Store
